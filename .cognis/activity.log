@@ -38,3 +38,4 @@
 2026-05-02T12:30:30  chore: IRONCLAD hardening pass
 2024-06-02T11:11:01  fix(parser): extract the scorer
 2024-06-23T18:28:08  test(scan): cover the multiline case
+2024-07-15T13:45:15  style(scoring): memoize repeated lookups
