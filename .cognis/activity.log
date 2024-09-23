@@ -42,3 +42,4 @@
 2024-08-06T08:02:22  chore(config): add a JSON schema for output
 2024-08-28T15:19:29  docs(deps): cover the multiline case
 2024-09-01T10:36:36  refactor(scan): memoize repeated lookups
+2024-09-23T17:53:43  build(engine): add a JSON schema for output
