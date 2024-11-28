@@ -45,3 +45,4 @@
 2024-09-23T17:53:43  build(engine): add a JSON schema for output
 2024-10-15T12:10:50  feat(output): cover the multiline case
 2024-11-06T19:27:57  fix(ci): memoize repeated lookups
+2024-11-28T14:44:04  test(cli): add a JSON schema for output
