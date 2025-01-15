@@ -48,3 +48,4 @@
 2024-11-28T14:44:04  test(cli): add a JSON schema for output
 2024-12-02T09:01:11  style(engine): cover the multiline case
 2024-12-24T16:18:18  ci(output): memoize repeated lookups
+2025-01-15T11:35:25  docs(cache): add a JSON schema for output
