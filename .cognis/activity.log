@@ -52,3 +52,4 @@
 2025-02-06T18:52:32  refactor(cli): cover the multiline case
 2025-02-28T13:09:39  test(engine): memoize repeated lookups
 2025-03-04T08:26:46  feat(scan): add a JSON schema for output
+2025-03-26T15:43:53  fix(scoring): cover the multiline case
