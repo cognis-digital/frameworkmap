@@ -55,3 +55,4 @@
 2025-03-26T15:43:53  fix(scoring): cover the multiline case
 2025-04-17T10:00:00  docs(core): memoize repeated lookups
 2025-05-09T17:17:07  style(deps): add a JSON schema for output
+2025-05-31T12:34:14  build(scan): cover the multiline case
