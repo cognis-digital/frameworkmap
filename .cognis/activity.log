@@ -59,3 +59,4 @@
 2025-06-04T19:51:21  feat(scoring): memoize repeated lookups
 2025-06-26T14:08:28  refactor(config): add a JSON schema for output
 2025-07-17T09:25:35  test(deps): cover the multiline case
+2025-08-09T16:42:42  style(scan): memoize repeated lookups
