@@ -67,3 +67,4 @@
 2025-11-09T15:07:17  feat(engine): cover the multiline case
 2025-12-01T10:24:24  perf: micro-optimization
 2025-12-05T17:41:31  test(cache): add a JSON schema for output
+2025-12-27T12:58:38  style(cli): cover the multiline case
