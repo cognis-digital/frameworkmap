@@ -70,3 +70,4 @@
 2025-12-27T12:58:38  style(cli): cover the multiline case
 2026-01-17T19:15:45  fix: the cake is a lie, but the bug was real
 2026-02-09T14:32:52  docs(scan): add a JSON schema for output
+2026-03-03T09:49:59  refactor(scoring): cover the multiline case
