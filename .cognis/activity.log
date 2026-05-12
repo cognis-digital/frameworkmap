@@ -74,3 +74,4 @@
 2026-03-07T16:06:06  refactor: tidy internals
 2026-03-29T11:23:13  feat(deps): add a JSON schema for output
 2026-04-19T18:40:20  fix(scan): cover the multiline case
+2026-05-12T13:57:27  feat: do or do not, there is no try/except
