@@ -36,9 +36,11 @@ auto-mapping is the killer GRC feature
 <a name="features"></a>
 ## Features
 
-- ✅ Todo
-- ✅ Fixme
-- ✅ Xxx
+- ✅ Load Catalog
+- ✅ Map Control
+- ✅ Crosswalk Framework
+- ✅ Coverage Report
+- ✅ Find Gaps
 - ✅ Runs on Linux/macOS/Windows · Docker · devcontainer
 - ✅ Ports in Python, JavaScript, Go, and Rust (`ports/`)
 
