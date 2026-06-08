@@ -1,0 +1,10 @@
+[
+  {"framework": "NIST", "id": "AC-2", "title": "Account Management", "objectives": ["AC", "IA"]},
+  {"framework": "NIST", "id": "SC-13", "title": "Cryptographic Protection", "objectives": ["SC"]},
+  {"framework": "ISO27001", "id": "A.5.15", "title": "Access control", "objectives": ["AC"]},
+  {"framework": "ISO27001", "id": "A.8.24", "title": "Use of cryptography", "objectives": ["SC"]},
+  {"framework": "SOC2", "id": "CC6.1", "title": "Logical access security controls", "objectives": ["AC", "IA"]},
+  {"framework": "SOC2", "id": "CC6.6", "title": "Encryption in transit", "objectives": ["SC"]},
+  {"framework": "CMMC", "id": "AC.L2-3.1.1", "title": "Limit system access to authorized users", "objectives": ["AC"]},
+  {"framework": "PCI", "id": "4.2", "title": "Strong cryptography over open networks", "objectives": ["SC"]}
+]
