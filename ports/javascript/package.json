@@ -1,0 +1,10 @@
+{
+  "name": "@cognis/frameworkmap",
+  "version": "0.2.0",
+  "description": "JavaScript port of frameworkmap (Cognis Neural Suite)",
+  "bin": {
+    "frameworkmap": "index.js"
+  },
+  "license": "LicenseRef-COCL-1.0",
+  "type": "module"
+}
