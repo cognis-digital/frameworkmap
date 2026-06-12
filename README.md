@@ -16,7 +16,7 @@
 </div>
 
 ```bash
-pip install cognis-frameworkmap
+pip install "git+https://github.com/cognis-digital/frameworkmap.git"
 frameworkmap scan .            # → prioritized findings in seconds
 ```
 
@@ -50,7 +50,7 @@ auto-mapping is the killer GRC feature
 ## Quick start
 
 ```bash
-pip install cognis-frameworkmap
+pip install "git+https://github.com/cognis-digital/frameworkmap.git"
 frameworkmap --version
 frameworkmap scan .                       # scan current project
 frameworkmap scan . --format json         # machine-readable
