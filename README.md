@@ -20,6 +20,42 @@ pip install cognis-frameworkmap
 frameworkmap scan .            # → prioritized findings in seconds
 ```
 
+## Usage — step by step
+
+1. **Install** the CLI:
+
+   ```bash
+   pipx install "git+https://github.com/cognis-digital/frameworkmap.git"
+   ```
+
+2. **List** what you can crosswalk, then map a single control to every other framework (primary command):
+
+   ```bash
+   frameworkmap frameworks            # supported frameworks
+   frameworkmap map AC-2              # one control -> all frameworks
+   ```
+
+3. **Crosswalk** two specific frameworks, or measure how much of one is covered by another:
+
+   ```bash
+   frameworkmap crosswalk nist iso27001
+   frameworkmap coverage nist soc2
+   frameworkmap gaps nist cmmc        # source controls with no target match
+   ```
+
+4. **Read the output** as JSON for pipelines, or swap in your own control catalog:
+
+   ```bash
+   frameworkmap --format json crosswalk nist pci > crosswalk.json
+   frameworkmap --catalog my-catalog.json coverage nist iso27001
+   ```
+
+5. **Automate in CI** — fail an audit-readiness check when coverage drops:
+
+   ```bash
+   frameworkmap --format json coverage nist soc2 | jq -e '.coverage >= 0.9'
+   ```
+
 ## Contents
 
 - [Why frameworkmap?](#why) · [Features](#features) · [Quick start](#quick-start) · [Example](#example) · [Architecture](#architecture) · [AI stack](#ai-stack) · [How it compares](#how-it-compares) · [Integrations](#integrations) · [Install anywhere](#install-anywhere) · [Related](#related) · [Contributing](#contributing)
