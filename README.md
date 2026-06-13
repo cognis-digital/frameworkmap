@@ -20,6 +20,12 @@ pip install "git+https://github.com/cognis-digital/frameworkmap.git"
 frameworkmap scan .            # → prioritized findings in seconds
 ```
 
+<!-- cognis:layman:start -->
+## What is this?
+
+Frameworkmap is a command-line tool that automatically translates security compliance controls between major frameworks — NIST, ISO 27001, SOC 2, CMMC, and PCI DSS — so you can see exactly how a requirement in one standard maps to equivalent requirements in another. If your organization needs to meet multiple compliance frameworks at once, it shows you which controls overlap, which you are already covering, and which gaps you still need to address. It runs entirely on your own machine with no account or cloud service required, and outputs results as a table or machine-readable JSON for use in automated pipelines. It is built for security engineers, GRC analysts, and compliance teams who want to stop manually cross-referencing spreadsheets.
+<!-- cognis:layman:end -->
+
 ## Contents
 
 - [Why frameworkmap?](#why) · [Features](#features) · [Quick start](#quick-start) · [Example](#example) · [Architecture](#architecture) · [AI stack](#ai-stack) · [How it compares](#how-it-compares) · [Integrations](#integrations) · [Install anywhere](#install-anywhere) · [Related](#related) · [Contributing](#contributing)
@@ -47,6 +53,42 @@ auto-mapping is the killer GRC feature
 <div align="right"><a href="#top">↑ back to top</a></div>
 
 <a name="quick-start"></a>
+<!-- cognis:install:start -->
+## Install
+
+`frameworkmap` is source-available (not published to PyPI) — every method below installs
+straight from GitHub. Pick whichever you prefer; the one-line scripts auto-detect
+the best tool available on your machine.
+
+**One-liner (Linux / macOS):**
+```sh
+curl -fsSL https://raw.githubusercontent.com/cognis-digital/frameworkmap/HEAD/install.sh | sh
+```
+
+**One-liner (Windows PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/cognis-digital/frameworkmap/HEAD/install.ps1 | iex
+```
+
+**Or install manually — any one of:**
+```sh
+pipx install "git+https://github.com/cognis-digital/frameworkmap.git"     # isolated (recommended)
+uv tool install "git+https://github.com/cognis-digital/frameworkmap.git"  # uv
+pip install "git+https://github.com/cognis-digital/frameworkmap.git"      # pip
+```
+
+**From source:**
+```sh
+git clone https://github.com/cognis-digital/frameworkmap.git
+cd frameworkmap && pip install .
+```
+
+Then run:
+```sh
+frameworkmap --help
+```
+<!-- cognis:install:end -->
+
 ## Quick start
 
 ```bash

@@ -61,8 +61,9 @@ class TestCore(unittest.TestCase):
     def test_gaps_are_uncovered(self):
         gaps = find_gaps("NIST", "PCI")
         gap_ids = {g["id"] for g in gaps}
-        # NIST PE-3 (physical) has no PCI equivalent in the catalog spine
-        self.assertIn("PE-3", gap_ids)
+        # NIST CP-9 (backup/contingency) has no PCI equivalent in the catalog spine;
+        # PCI covers MP+PE via 9.4 but has no CP-objective control.
+        self.assertIn("CP-9", gap_ids)
 
     def test_bad_framework_raises(self):
         with self.assertRaises(ValueError):
