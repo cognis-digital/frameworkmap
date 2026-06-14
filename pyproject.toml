@@ -34,3 +34,6 @@ frameworkmap = "frameworkmap.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["frameworkmap"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
