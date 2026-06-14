@@ -111,7 +111,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         else:  # pragma: no cover
             parser.error("unknown command")
             return 2
-    except (KeyError, ValueError, FileNotFoundError) as e:
+    except FileNotFoundError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+    except (KeyError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0

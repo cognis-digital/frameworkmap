@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -69,6 +70,62 @@ class TestCore(unittest.TestCase):
         with self.assertRaises(ValueError):
             crosswalk_framework("NIST", "NOPE")
 
+    def test_map_control_empty_id_raises(self):
+        with self.assertRaises(ValueError):
+            map_control("")
+
+    def test_crosswalk_same_framework_raises(self):
+        with self.assertRaises(ValueError):
+            crosswalk_framework("NIST", "NIST")
+
+    def test_catalog_missing_file_raises(self):
+        with self.assertRaises(FileNotFoundError):
+            load_catalog("/nonexistent/path/catalog.json")
+
+    def test_catalog_invalid_json_raises(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("this is not json {{{")
+            fname = f.name
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                load_catalog(fname)
+            self.assertIn("not valid JSON", str(ctx.exception))
+        finally:
+            os.unlink(fname)
+
+    def test_catalog_missing_framework_field_raises(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump([{"id": "X-1", "title": "Missing framework", "objectives": ["AC"]}], f)
+            fname = f.name
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                load_catalog(fname)
+            self.assertIn("missing required field 'framework'", str(ctx.exception))
+        finally:
+            os.unlink(fname)
+
+    def test_catalog_objectives_not_list_raises(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump([{"framework": "NIST", "id": "X-1", "title": "bad", "objectives": "AC"}], f)
+            fname = f.name
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                load_catalog(fname)
+            self.assertIn("must be a list", str(ctx.exception))
+        finally:
+            os.unlink(fname)
+
+    def test_catalog_empty_list_raises(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            json.dump([], f)
+            fname = f.name
+        try:
+            with self.assertRaises(ValueError) as ctx:
+                load_catalog(fname)
+            self.assertIn("empty", str(ctx.exception))
+        finally:
+            os.unlink(fname)
+
 
 class TestCLI(unittest.TestCase):
     def _run(self, argv):
@@ -101,6 +158,43 @@ class TestCLI(unittest.TestCase):
         code, out = self._run(["--format", "json", "frameworks"])
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out), FRAMEWORKS)
+
+    def test_missing_catalog_file_returns_2(self):
+        buf = io.StringIO()
+        old_err = sys.stderr
+        sys.stderr = buf
+        try:
+            code = main(["--catalog", "/nonexistent/file.json", "map", "AC-2"])
+        finally:
+            sys.stderr = old_err
+        self.assertEqual(code, 2)
+        self.assertIn("error", buf.getvalue())
+
+    def test_malformed_catalog_json_returns_1(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("{not json}")
+            fname = f.name
+        buf = io.StringIO()
+        old_err = sys.stderr
+        sys.stderr = buf
+        try:
+            code = main(["--catalog", fname, "map", "AC-2"])
+        finally:
+            sys.stderr = old_err
+            os.unlink(fname)
+        self.assertEqual(code, 1)
+        self.assertIn("error", buf.getvalue())
+
+    def test_same_framework_crosswalk_returns_1(self):
+        buf = io.StringIO()
+        old_err = sys.stderr
+        sys.stderr = buf
+        try:
+            code = main(["crosswalk", "NIST", "NIST"])
+        finally:
+            sys.stderr = old_err
+        self.assertEqual(code, 1)
+        self.assertIn("error", buf.getvalue())
 
 
 if __name__ == "__main__":

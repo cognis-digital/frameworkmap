@@ -133,21 +133,41 @@ def load_catalog(path: Optional[str] = None) -> List[Control]:
     if path:
         if not os.path.exists(path):
             raise FileNotFoundError(f"catalog not found: {path}")
-        with open(path, "r", encoding="utf-8") as fh:
-            data = json.load(fh)
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"catalog file is not valid JSON: {exc}") from exc
+        except UnicodeDecodeError as exc:
+            raise ValueError(f"catalog file is not valid UTF-8: {exc}") from exc
         if not isinstance(data, list):
             raise ValueError("catalog JSON must be a list of control objects")
+        if len(data) == 0:
+            raise ValueError("catalog JSON list is empty")
         rows = data
     out: List[Control] = []
-    for r in rows:
-        fw = str(r["framework"]).upper()
+    for idx, r in enumerate(rows):
+        if not isinstance(r, dict):
+            raise ValueError(f"catalog entry at index {idx} must be a dict, got {type(r).__name__!r}")
+        if "framework" not in r:
+            raise ValueError(f"catalog entry at index {idx} is missing required field 'framework'")
+        if "id" not in r:
+            raise ValueError(f"catalog entry at index {idx} is missing required field 'id'")
+        fw = str(r["framework"]).strip().upper()
+        if not fw:
+            raise ValueError(f"catalog entry at index {idx} has an empty 'framework' value")
         if fw not in FRAMEWORKS:
-            raise ValueError(f"unknown framework {fw!r} (expected one of {FRAMEWORKS})")
-        objs = [o.upper() for o in r.get("objectives", [])]
+            raise ValueError(f"unknown framework {fw!r} at index {idx} (expected one of {FRAMEWORKS})")
+        raw_objs = r.get("objectives", [])
+        if not isinstance(raw_objs, list):
+            raise ValueError(
+                f"'objectives' for control {r['id']!r} must be a list, got {type(raw_objs).__name__!r}"
+            )
+        objs = [str(o).strip().upper() for o in raw_objs]
         for o in objs:
             if o not in OBJECTIVES:
-                raise ValueError(f"unknown objective {o!r} on {r['id']}")
-        out.append(Control(fw, str(r["id"]), str(r.get("title", "")), objs))
+                raise ValueError(f"unknown objective {o!r} on control {r['id']!r}")
+        out.append(Control(fw, str(r["id"]).strip(), str(r.get("title", "")), objs))
     return out
 
 
@@ -169,6 +189,8 @@ def _find(catalog: List[Control], control_id: str) -> Control:
 
 def map_control(control_id: str, catalog: Optional[List[Control]] = None) -> Crosswalk:
     """Auto-map one control to equivalents in every other framework."""
+    if not control_id or not str(control_id).strip():
+        raise ValueError("control_id must not be empty")
     cat = catalog if catalog is not None else load_catalog()
     src = _find(cat, control_id)
     idx = _index_by_objective(cat)
@@ -193,11 +215,17 @@ def map_control(control_id: str, catalog: Optional[List[Control]] = None) -> Cro
 def crosswalk_framework(source_fw: str, target_fw: str,
                         catalog: Optional[List[Control]] = None) -> List[dict]:
     """Full N:N crosswalk between two frameworks."""
-    src_fw = source_fw.upper()
-    tgt_fw = target_fw.upper()
+    if not source_fw or not str(source_fw).strip():
+        raise ValueError("source_fw must not be empty")
+    if not target_fw or not str(target_fw).strip():
+        raise ValueError("target_fw must not be empty")
+    src_fw = source_fw.strip().upper()
+    tgt_fw = target_fw.strip().upper()
     for fw in (src_fw, tgt_fw):
         if fw not in FRAMEWORKS:
             raise ValueError(f"unknown framework {fw!r}")
+    if src_fw == tgt_fw:
+        raise ValueError(f"source and target framework must differ, both are {src_fw!r}")
     cat = catalog if catalog is not None else load_catalog()
     idx = _index_by_objective(cat)
     rows: List[dict] = []
