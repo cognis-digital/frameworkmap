@@ -17,7 +17,7 @@
 
 ```bash
 pip install cognis-frameworkmap
-frameworkmap scan .            # → prioritized findings in seconds
+frameworkmap map AC-2          # → one control mapped across every framework
 ```
 
 ## Usage — step by step
@@ -43,17 +43,21 @@ frameworkmap scan .            # → prioritized findings in seconds
    frameworkmap gaps nist cmmc        # source controls with no target match
    ```
 
-4. **Read the output** as JSON for pipelines, or swap in your own control catalog:
+4. **Read the output** in the format your workflow speaks — `table` (default),
+   `json`, `csv`, or `md` (Markdown table for audit reports) — or swap in your
+   own control catalog:
 
    ```bash
    frameworkmap --format json crosswalk nist pci > crosswalk.json
+   frameworkmap --format csv  crosswalk nist iso27001 > crosswalk.csv   # spreadsheet
+   frameworkmap --format md   crosswalk nist iso27001                   # paste into a report
    frameworkmap --catalog my-catalog.json coverage nist iso27001
    ```
 
 5. **Automate in CI** — fail an audit-readiness check when coverage drops:
 
    ```bash
-   frameworkmap --format json coverage nist soc2 | jq -e '.coverage >= 0.9'
+   frameworkmap --format json coverage nist soc2 | jq -e '.coverage_pct >= 90'
    ```
 
 ## Contents
@@ -65,7 +69,7 @@ frameworkmap scan .            # → prioritized findings in seconds
 
 auto-mapping is the killer GRC feature
 
-`frameworkmap` is single-purpose, scriptable, and self-hostable: point it at a target, get prioritized results in the format your workflow already speaks (table · JSON · SARIF), gate CI on it, and let agents drive it over MCP.
+`frameworkmap` is single-purpose, scriptable, and self-hostable: map a control or a whole framework, get results in the format your workflow already speaks (table · JSON · CSV · Markdown), gate CI on coverage, and let agents drive it over MCP.
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 
@@ -77,6 +81,7 @@ auto-mapping is the killer GRC feature
 - ✅ Crosswalk Framework
 - ✅ Coverage Report
 - ✅ Find Gaps
+- ✅ Export to table · JSON · CSV · Markdown (audit working papers)
 - ✅ Runs on Linux/macOS/Windows · Docker · devcontainer
 - ✅ Ports in Python, JavaScript, Go, and Rust (`ports/`)
 
@@ -88,9 +93,10 @@ auto-mapping is the killer GRC feature
 ```bash
 pip install cognis-frameworkmap
 frameworkmap --version
-frameworkmap scan .                       # scan current project
-frameworkmap scan . --format json         # machine-readable
-frameworkmap scan . --fail-on high        # CI gate (non-zero exit)
+frameworkmap map AC-2                      # one control -> all frameworks
+frameworkmap coverage nist iso27001        # how much of NIST maps onto ISO 27001
+frameworkmap gaps nist pci                 # NIST controls with no PCI equivalent
+frameworkmap --format csv crosswalk nist iso27001 > crosswalk.csv   # audit export
 ```
 
 <div align="right"><a href="#top">↑ back to top</a></div>
@@ -99,12 +105,39 @@ frameworkmap scan . --fail-on high        # CI gate (non-zero exit)
 ## Example
 
 ```text
-$ frameworkmap scan .
-  [HIGH    ] FRA-001  example finding             (./src/app.py)
-  [MEDIUM  ] FRA-002  another signal              (./config.yaml)
+$ frameworkmap map AC-2
+NIST AC-2  Account Management
+objectives: AC, IA
+  ISO27001  A.5.15         Access control  [via AC]
+  SOC2      CC6.1          Logical access security controls  [via AC]
+  CMMC      AC.L2-3.1.1    Limit system access to authorized users  [via AC]
+  PCI       7.2            Restrict access by business need to know  [via AC]
+  PCI       8.3            Strong authentication for users  [via IA]
 
-  2 findings · risk score 5 · 38ms
+$ frameworkmap coverage NIST PCI
+NIST -> PCI
+  controls : 15
+  covered  : 13
+  gaps     : 2
+  coverage : 86.7%
 ```
+
+### Demos
+
+Realistic, runnable scenarios live in [`demos/`](demos/) — each has a
+`SCENARIO.md` with the persona, exact commands, expected output, and how to act:
+
+| Demo | Scenario |
+|---|---|
+| [`01-basic`](demos/01-basic/) | Auto-map one NIST control across the whole GRC stack |
+| [`02-soc2-to-iso-readiness`](demos/02-soc2-to-iso-readiness/) | SOC 2 shop pursuing ISO 27001 — readiness + net-new gaps |
+| [`03-pci-gap-assessment`](demos/03-pci-gap-assessment/) | PCI DSS v4.0 merchant cross-referencing NIST 800-53 |
+| [`04-cmmc-defense-contractor`](demos/04-cmmc-defense-contractor/) | DIB contractor: NIST program → CMMC 2.0 Level 2 |
+| [`05-custom-catalog-startup`](demos/05-custom-catalog-startup/) | Bring-your-own catalog for an *honest* startup coverage number |
+| [`06-audit-export-csv`](demos/06-audit-export-csv/) | Export a crosswalk to CSV / Markdown for the working paper |
+| [`07-coverage-ci-gate`](demos/07-coverage-ci-gate/) | Fail CI when audit-readiness coverage drops below a threshold |
+| [`08-multi-framework-matrix`](demos/08-multi-framework-matrix/) | One-glance coverage matrix across all five frameworks |
+| [`09-objective-spine`](demos/09-objective-spine/) | Why two controls "match" — trace every mapping to its objective |
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 
@@ -125,9 +158,9 @@ flowchart LR
 `frameworkmap` is interoperable with every popular way of using AI:
 
 - **MCP server** — `frameworkmap mcp` (Claude Desktop, Cursor, Cognis.Studio, [uncensored-fleet](https://github.com/cognis-digital/uncensored-fleet))
-- **OpenAI-compatible / JSON** — pipe `frameworkmap scan . --format json` into any agent or LLM
+- **OpenAI-compatible / JSON** — pipe `frameworkmap --format json crosswalk nist iso27001` into any agent or LLM
 - **LangChain · CrewAI · AutoGen · LlamaIndex** — wrap the CLI/JSON as a tool in one line
-- **CI / scripts** — exit codes + SARIF for non-AI pipelines
+- **CI / scripts** — exit codes + JSON/CSV for non-AI pipelines
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 
@@ -138,7 +171,7 @@ flowchart LR
 |---|:---:|:---:|
 | Self-hostable, no account | ✅ | varies |
 | Single command, zero config | ✅ | ⚠️ |
-| JSON + SARIF for CI | ✅ | varies |
+| JSON + CSV + Markdown export | ✅ | varies |
 | MCP-native (AI agents) | ✅ | ❌ |
 | Polyglot ports (JS/Go/Rust) | ✅ | ❌ |
 | Open license | ✅ COCL | varies |
@@ -150,7 +183,7 @@ flowchart LR
 <a name="integrations"></a>
 ## Integrations
 
-Pipes into your stack: **SARIF** for code-scanning, **JSON** for anything, an **MCP server** (`frameworkmap mcp`) for AI agents, and a webhook forwarder for SIEM/Slack/Jira. See [`docs/INTEGRATIONS.md`](docs/INTEGRATIONS.md).
+Pipes into your stack: **CSV/Markdown** for audit working papers and spreadsheets, **JSON** for anything, an **MCP server** (`frameworkmap mcp`) for AI agents, and a webhook forwarder for SIEM/Slack/Jira. See [`docs/INTEGRATIONS.md`](docs/INTEGRATIONS.md).
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 

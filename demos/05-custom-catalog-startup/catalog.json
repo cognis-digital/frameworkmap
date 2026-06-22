@@ -1,0 +1,18 @@
+[
+  {"framework": "SOC2", "id": "CC6.1", "title": "Logical access security controls", "objectives": ["AC", "IA"]},
+  {"framework": "SOC2", "id": "CC6.2", "title": "User registration & authorization", "objectives": ["AC"]},
+  {"framework": "SOC2", "id": "CC6.6", "title": "Boundary protection / encryption in transit", "objectives": ["SC"]},
+  {"framework": "SOC2", "id": "CC7.2", "title": "Security event monitoring", "objectives": ["AU"]},
+  {"framework": "SOC2", "id": "CC8.1", "title": "Change management", "objectives": ["CM"]},
+  {"framework": "SOC2", "id": "A1.2", "title": "Backup & recovery (availability)", "objectives": ["CP"]},
+
+  {"framework": "NIST", "id": "AC-2", "title": "Account Management", "objectives": ["AC", "IA"]},
+  {"framework": "NIST", "id": "IA-2", "title": "Identification and Authentication", "objectives": ["IA"]},
+  {"framework": "NIST", "id": "AU-2", "title": "Event Logging", "objectives": ["AU"]},
+  {"framework": "NIST", "id": "CM-2", "title": "Baseline Configuration", "objectives": ["CM"]},
+  {"framework": "NIST", "id": "SC-8", "title": "Transmission Confidentiality and Integrity", "objectives": ["SC"]},
+  {"framework": "NIST", "id": "CP-9", "title": "System Backup", "objectives": ["CP"]},
+  {"framework": "NIST", "id": "RA-5", "title": "Vulnerability Monitoring and Scanning", "objectives": ["VM"]},
+  {"framework": "NIST", "id": "IR-4", "title": "Incident Handling", "objectives": ["IR"]},
+  {"framework": "NIST", "id": "AT-2", "title": "Literacy Training and Awareness", "objectives": ["AT"]}
+]

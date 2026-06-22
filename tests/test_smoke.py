@@ -61,8 +61,10 @@ class TestCore(unittest.TestCase):
     def test_gaps_are_uncovered(self):
         gaps = find_gaps("NIST", "PCI")
         gap_ids = {g["id"] for g in gaps}
-        # NIST PE-3 (physical) has no PCI equivalent in the catalog spine
-        self.assertIn("PE-3", gap_ids)
+        # NIST RA-3 (risk assessment) and CP-9 (backup/contingency) have no PCI
+        # equivalent in the catalog spine — PCI carries no RA or CP objective.
+        self.assertIn("RA-3", gap_ids)
+        self.assertIn("CP-9", gap_ids)
 
     def test_bad_framework_raises(self):
         with self.assertRaises(ValueError):
@@ -100,6 +102,77 @@ class TestCLI(unittest.TestCase):
         code, out = self._run(["--format", "json", "frameworks"])
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out), FRAMEWORKS)
+
+
+class TestExportFormats(unittest.TestCase):
+    """csv / md tabular export formats (added in this release)."""
+
+    def _run(self, argv):
+        buf = io.StringIO()
+        old = sys.stdout
+        sys.stdout = buf
+        try:
+            code = main(argv)
+        finally:
+            sys.stdout = old
+        return code, buf.getvalue()
+
+    def test_csv_map_has_header_and_rows(self):
+        import csv as _csv
+        code, out = self._run(["--format", "csv", "map", "AC-2"])
+        self.assertEqual(code, 0)
+        rows = list(_csv.reader(io.StringIO(out)))
+        self.assertEqual(rows[0],
+                         ["source_framework", "source_id", "source_title",
+                          "target_framework", "target_id", "target_title", "via"])
+        # at least one real mapping row to SOC2 CC6.1
+        body = rows[1:]
+        self.assertTrue(any(r[3] == "SOC2" and r[4] == "CC6.1" for r in body))
+        # every data row carries the source control id
+        self.assertTrue(all(r[1] == "AC-2" for r in body))
+
+    def test_csv_coverage_single_row(self):
+        import csv as _csv
+        code, out = self._run(["--format", "csv", "coverage", "NIST", "PCI"])
+        self.assertEqual(code, 0)
+        rows = list(_csv.reader(io.StringIO(out)))
+        self.assertEqual(rows[0],
+                         ["source", "target", "total_controls", "covered",
+                          "uncovered", "coverage_pct"])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[1][0], "NIST")
+        self.assertEqual(rows[1][1], "PCI")
+
+    def test_csv_gaps_names_frameworks(self):
+        import csv as _csv
+        code, out = self._run(["--format", "csv", "gaps", "NIST", "PCI"])
+        self.assertEqual(code, 0)
+        rows = list(_csv.reader(io.StringIO(out)))
+        ids = {r[1] for r in rows[1:]}
+        self.assertIn("CP-9", ids)
+        self.assertIn("RA-3", ids)
+        # source/target framework columns are populated
+        self.assertTrue(all(r[0] == "NIST" and r[3] == "PCI" for r in rows[1:]))
+
+    def test_md_crosswalk_is_table(self):
+        code, out = self._run(["--format", "md", "crosswalk", "NIST", "ISO27001"])
+        self.assertEqual(code, 0)
+        lines = out.splitlines()
+        self.assertTrue(lines[0].startswith("|"))
+        self.assertTrue(set(lines[1].replace("|", "").replace(" ", "")) <= {"-"})
+        self.assertIn("via", lines[0])
+
+    def test_md_objectives_table(self):
+        code, out = self._run(["--format", "md", "objectives"])
+        self.assertEqual(code, 0)
+        self.assertIn("| objective | label |", out)
+        self.assertIn("Access control", out)
+
+    def test_md_escapes_pipes(self):
+        # No catalog title currently contains a pipe; assert the escaper itself.
+        from frameworkmap.cli import _to_md
+        rendered = _to_md(["a"], [["x | y"]])
+        self.assertIn("x \\| y", rendered)
 
 
 if __name__ == "__main__":
