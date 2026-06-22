@@ -152,6 +152,60 @@ flowchart LR
 
 <div align="right"><a href="#top">↑ back to top</a></div>
 
+<a name="feeds"></a>
+## Threat-informed data feeds (real sources, edge / air-gap)
+
+By default FRAMEWORKMAP crosswalks a curated control spine. It can also enrich
+that crosswalk from two **authoritative, keyless** upstream feeds, turning a
+compliance map into a *threat-informed* control map:
+
+| feed id | real source | what it adds |
+|---|---|---|
+| `oscal-800-53-rev5-catalog` | NIST OSCAL content — <https://github.com/usnistgov/oscal-content> (`nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json`) | **authoritative** SP 800-53 Rev 5 control titles |
+| `attack-nist-mappings` | Center for Threat-Informed Defense *Mappings Explorer* — <https://github.com/center-for-threat-informed-defense/mappings-explorer> | the **MITRE ATT&CK techniques each NIST control mitigates** |
+
+Both are fetched over HTTPS by the bundled, stdlib-only ingestion module
+(`frameworkmap.datafeeds`), cached to disk, and re-served **offline**.
+
+```bash
+frameworkmap feeds list                     # the feeds FRAMEWORKMAP consumes + cache age
+frameworkmap feeds update                    # fetch + cache both (online, once)
+frameworkmap feeds get attack-nist-mappings --offline
+
+frameworkmap enrich AC-2 --offline           # authoritative title + ATT&CK techniques
+frameworkmap threat-map SOC2 --offline       # NIST->SOC2 crosswalk + ATT&CK coverage per control
+frameworkmap --format csv threat-map SOC2 --offline > ssp_threat_map.csv
+```
+
+Example (`enrich AC-2`): resolves the OSCAL title **Account Management** and
+attaches the ATT&CK techniques AC-2 mitigates (T1003 *OS Credential Dumping*,
+T1003.001 *LSASS Memory*, …).
+
+### Edge / air-gap workflow
+
+Everything runs disconnected. Fetch once on a connected box, snapshot the cache,
+sneakernet it to the enclave, then run `--offline` forever:
+
+```bash
+# connected staging box
+frameworkmap feeds update
+python -m frameworkmap.datafeeds snapshot-export feeds.tar.gz
+
+# air-gapped enclave
+export COGNIS_FEEDS_CACHE=/secure/feeds
+python -m frameworkmap.datafeeds snapshot-import feeds.tar.gz
+frameworkmap threat-map SOC2 --offline       # never touches the network
+```
+
+`COGNIS_FEEDS_CACHE` (default `~/.cache/cognis-feeds`) selects the cache dir.
+`--offline` / `offline=True` serve the cache only and refuse any fetch. The test
+suite runs fully offline against trimmed fixtures under `tests/fixtures/`.
+
+> Defensive / authorized-use compliance tooling only. The feed ids are restricted
+> to FRAMEWORKMAP's catalog entries — `feeds update` rejects any other id.
+
+<div align="right"><a href="#top">↑ back to top</a></div>
+
 <a name="ai-stack"></a>
 ## Use it from any AI stack
 

@@ -9,6 +9,7 @@ import sys
 from typing import List, Optional
 
 from . import TOOL_NAME, TOOL_VERSION
+from . import datafeeds, feeds as feeds_mod
 from .core import (
     FRAMEWORKS,
     OBJECTIVES,
@@ -138,6 +139,52 @@ def _print_gaps(gaps: list) -> None:
         print(f"{g['id']:<14} {g['title']}")
 
 
+def _print_enrich(d: dict) -> None:
+    title = d.get("authoritative_title") or "(not in OSCAL catalog)"
+    print(f"{d['control_id']}  {title}")
+    techs = d.get("techniques_mitigated", [])
+    print(f"mitigates {len(techs)} ATT&CK technique(s):")
+    for t in techs:
+        print(f"  {t['technique']:<12} {t['name']}  [{t['mapping_type']}]")
+
+
+def _rows_enrich(d: dict):
+    header = ["control_id", "authoritative_title", "technique", "technique_name", "mapping_type"]
+    techs = d.get("techniques_mitigated", [])
+    title = d.get("authoritative_title") or ""
+    if not techs:
+        return header, [[d["control_id"], title, "", "(no ATT&CK mapping)", ""]]
+    return header, [[d["control_id"], title, t["technique"], t["name"], t["mapping_type"]]
+                    for t in techs]
+
+
+def _print_threat_map(rows: list) -> None:
+    for r in rows:
+        src = r["source"]
+        title = r.get("authoritative_title") or src["title"]
+        tgt = ", ".join(m["id"] for m in r["matches"]) or "-- GAP --"
+        techs = r.get("techniques", [])
+        tcov = ", ".join(t["technique"] for t in techs) if techs else "(no ATT&CK)"
+        print(f"{src['id']:<10} {title}")
+        print(f"    -> {tgt}")
+        print(f"    ATT&CK: {tcov}")
+
+
+def _rows_threat_map(data):
+    rows_in, tgt_fw = data
+    header = ["nist_id", "authoritative_title", f"{tgt_fw}_ids",
+              "attack_techniques", "technique_count"]
+    out = []
+    for r in rows_in:
+        src = r["source"]
+        title = r.get("authoritative_title") or src["title"]
+        tgt = ", ".join(m["id"] for m in r["matches"])
+        techs = r.get("techniques", [])
+        out.append([src["id"], title, tgt,
+                    " ".join(t["technique"] for t in techs), len(techs)])
+    return header, out
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog=TOOL_NAME, description="Crosswalk compliance controls across frameworks.")
     p.add_argument("--version", action="version", version=f"{TOOL_NAME} {TOOL_VERSION}")
@@ -163,6 +210,33 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("frameworks", help="list supported frameworks")
     sub.add_parser("objectives", help="list shared control objectives")
+
+    # --- threat-informed enrichment (uses the bundled data feeds) ----------
+    ti = sub.add_parser(
+        "threat-map",
+        help="enrich a NIST->target crosswalk with authoritative OSCAL titles + "
+             "ATT&CK techniques each control mitigates (uses data feeds)")
+    ti.add_argument("target", choices=FRAMEWORKS, help="target framework to crosswalk NIST onto")
+    ti.add_argument("--offline", action="store_true",
+                    help="serve feeds from the local cache only; never touch the network")
+
+    en = sub.add_parser(
+        "enrich",
+        help="authoritative OSCAL title + mitigated ATT&CK techniques for one NIST control id")
+    en.add_argument("control_id")
+    en.add_argument("--offline", action="store_true",
+                    help="serve feeds from the local cache only; never touch the network")
+
+    # --- data-feed management (restricted to FRAMEWORKMAP's relevant feeds) -
+    fe = sub.add_parser("feeds", help="manage FRAMEWORKMAP's authoritative data feeds")
+    fes = fe.add_subparsers(dest="feeds_command", required=True)
+    fes.add_parser("list", help="list the feeds FRAMEWORKMAP consumes + cache freshness")
+    fu = fes.add_parser("update", help="fetch + cache one or more feeds (online)")
+    fu.add_argument("ids", nargs="*", default=[],
+                    help=f"feed ids (default: all of {feeds_mod.FEED_IDS})")
+    fg = fes.add_parser("get", help="print a cached/fetched feed (truncated)")
+    fg.add_argument("id", choices=feeds_mod.FEED_IDS)
+    fg.add_argument("--offline", action="store_true", help="serve from cache only")
     return p
 
 
@@ -192,13 +266,61 @@ def main(argv: Optional[List[str]] = None) -> int:
             _emit(OBJECTIVES, args.format,
                   lambda o: print("\n".join(f"{k}  {v}" for k, v in o.items())),
                   lambda o: (["objective", "label"], [[k, v] for k, v in o.items()]))
+        elif args.command == "enrich":
+            data = feeds_mod.enrich_nist_control(args.control_id, offline=args.offline)
+            _emit(data, args.format, _print_enrich, _rows_enrich)
+        elif args.command == "threat-map":
+            rows = crosswalk_framework("NIST", args.target, catalog)
+            data = feeds_mod.threat_informed_crosswalk(rows, offline=args.offline)
+            _emit(data, args.format, _print_threat_map,
+                  lambda d: _rows_threat_map((d, args.target.upper())))
+        elif args.command == "feeds":
+            return _feeds_cmd(args)
         else:  # pragma: no cover
             parser.error("unknown command")
             return 2
-    except (KeyError, ValueError, FileNotFoundError) as e:
+    except (KeyError, ValueError, FileNotFoundError, ConnectionError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0
+
+
+# --------------------------------------------------------------------------- #
+# feeds subcommand (restricted to FRAMEWORKMAP's relevant feed ids)
+# --------------------------------------------------------------------------- #
+def _feeds_cmd(args) -> int:
+    catalog = datafeeds.load_catalog()
+    by_id = {f["id"]: f for f in catalog.get("feeds", [])}
+    if args.feeds_command == "list":
+        for fid in feeds_mod.FEED_IDS:
+            f = by_id.get(fid, {})
+            age = datafeeds.cached_age_hours(fid)
+            fresh = "uncached" if age is None else f"{age:.1f}h old"
+            print(f"  {fid:30} [{fresh:>10}]  {f.get('name', '')}")
+            if f.get("url"):
+                print(f"      {f['url']}")
+        return 0
+    if args.feeds_command == "update":
+        ids = args.ids or list(feeds_mod.FEED_IDS)
+        bad = [i for i in ids if i not in feeds_mod.FEED_IDS]
+        if bad:
+            print(f"error: not a FRAMEWORKMAP feed: {', '.join(bad)} "
+                  f"(allowed: {', '.join(feeds_mod.FEED_IDS)})", file=sys.stderr)
+            return 1
+        for fid in ids:
+            pth = datafeeds.update(fid, catalog=catalog)
+            print(f"  updated {fid} -> {pth} ({pth.stat().st_size} bytes)")
+        return 0
+    if args.feeds_command == "get":
+        data = datafeeds.get(args.id, offline=args.offline, catalog=catalog)
+        text = json.dumps(data, indent=2) if isinstance(data, (dict, list)) else data
+        print(text[:4000])
+        return 0
+    return 1  # pragma: no cover
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -1,0 +1,188 @@
+{
+ "catalog": {
+  "uuid": "ea7c7688-79c5-463b-a91b-0650f2d98623",
+  "metadata": {
+   "title": "NIST SP 800-53 Rev 5 (trimmed test fixture)",
+   "version": "5.1.1"
+  },
+  "groups": [
+   {
+    "id": "ac",
+    "class": "family",
+    "title": "Access Control",
+    "controls": [
+     {
+      "id": "ac-2",
+      "class": "SP800-53",
+      "title": "Account Management"
+     },
+     {
+      "id": "ac-3",
+      "class": "SP800-53",
+      "title": "Access Enforcement"
+     },
+     {
+      "id": "ac-6",
+      "class": "SP800-53",
+      "title": "Least Privilege"
+     }
+    ]
+   },
+   {
+    "id": "at",
+    "class": "family",
+    "title": "Awareness and Training",
+    "controls": [
+     {
+      "id": "at-2",
+      "class": "SP800-53",
+      "title": "Literacy Training and Awareness"
+     }
+    ]
+   },
+   {
+    "id": "au",
+    "class": "family",
+    "title": "Audit and Accountability",
+    "controls": [
+     {
+      "id": "au-2",
+      "class": "SP800-53",
+      "title": "Event Logging"
+     },
+     {
+      "id": "au-6",
+      "class": "SP800-53",
+      "title": "Audit Record Review, Analysis, and Reporting"
+     },
+     {
+      "id": "au-12",
+      "class": "SP800-53",
+      "title": "Audit Record Generation"
+     }
+    ]
+   },
+   {
+    "id": "cm",
+    "class": "family",
+    "title": "Configuration Management",
+    "controls": [
+     {
+      "id": "cm-2",
+      "class": "SP800-53",
+      "title": "Baseline Configuration"
+     },
+     {
+      "id": "cm-6",
+      "class": "SP800-53",
+      "title": "Configuration Settings"
+     }
+    ]
+   },
+   {
+    "id": "cp",
+    "class": "family",
+    "title": "Contingency Planning",
+    "controls": [
+     {
+      "id": "cp-9",
+      "class": "SP800-53",
+      "title": "System Backup"
+     }
+    ]
+   },
+   {
+    "id": "ia",
+    "class": "family",
+    "title": "Identification and Authentication",
+    "controls": [
+     {
+      "id": "ia-2",
+      "class": "SP800-53",
+      "title": "Identification and Authentication (Organizational Users)"
+     },
+     {
+      "id": "ia-5",
+      "class": "SP800-53",
+      "title": "Authenticator Management"
+     }
+    ]
+   },
+   {
+    "id": "ir",
+    "class": "family",
+    "title": "Incident Response",
+    "controls": [
+     {
+      "id": "ir-4",
+      "class": "SP800-53",
+      "title": "Incident Handling"
+     }
+    ]
+   },
+   {
+    "id": "mp",
+    "class": "family",
+    "title": "Media Protection",
+    "controls": [
+     {
+      "id": "mp-6",
+      "class": "SP800-53",
+      "title": "Media Sanitization"
+     }
+    ]
+   },
+   {
+    "id": "pe",
+    "class": "family",
+    "title": "Physical and Environmental Protection",
+    "controls": [
+     {
+      "id": "pe-3",
+      "class": "SP800-53",
+      "title": "Physical Access Control"
+     }
+    ]
+   },
+   {
+    "id": "ra",
+    "class": "family",
+    "title": "Risk Assessment",
+    "controls": [
+     {
+      "id": "ra-3",
+      "class": "SP800-53",
+      "title": "Risk Assessment"
+     },
+     {
+      "id": "ra-5",
+      "class": "SP800-53",
+      "title": "Vulnerability Monitoring and Scanning"
+     }
+    ]
+   },
+   {
+    "id": "sc",
+    "class": "family",
+    "title": "System and Communications Protection",
+    "controls": [
+     {
+      "id": "sc-8",
+      "class": "SP800-53",
+      "title": "Transmission Confidentiality and Integrity"
+     },
+     {
+      "id": "sc-13",
+      "class": "SP800-53",
+      "title": "Cryptographic Protection"
+     },
+     {
+      "id": "sc-28",
+      "class": "SP800-53",
+      "title": "Protection of Information at Rest"
+     }
+    ]
+   }
+  ]
+ }
+}

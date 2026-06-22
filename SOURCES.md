@@ -1,5 +1,17 @@
 # Sources
 
+## Authoritative data feeds (consumed by `frameworkmap feeds` / `enrich` / `threat-map`)
+
+Real, keyless feeds fetched over HTTPS, cached to disk, and re-served offline for
+edge / air-gap deployment (see README "Threat-informed data feeds").
+
+- **`oscal-800-53-rev5-catalog`** — NIST SP 800-53 Rev 5 catalog, native OSCAL JSON.
+  <https://github.com/usnistgov/oscal-content> — authoritative control titles.
+- **`attack-nist-mappings`** — Center for Threat-Informed Defense *Mappings Explorer*,
+  ATT&CK <-> NIST 800-53 Rev 5 crosswalk.
+  <https://github.com/center-for-threat-informed-defense/mappings-explorer> —
+  the ATT&CK techniques each NIST control mitigates.
+
 <!-- cognis-2026-live-sources -->
 
 ## Live 2026 sources (auto-expanded)
