@@ -1,0 +1,30 @@
+$ frameworkmap-emit --help
+
+usage: frameworkmap [-h] [--version] [--format {table,json,csv,md}]
+                    [--catalog CATALOG]
+                    {map,crosswalk,coverage,gaps,frameworks,objectives,threat-map,enrich,feeds} ...
+
+Crosswalk compliance controls across frameworks.
+
+positional arguments:
+  {map,crosswalk,coverage,gaps,frameworks,objectives,threat-map,enrich,feeds}
+    map                 auto-map one control to all other frameworks
+    crosswalk           full crosswalk between two frameworks
+    coverage            coverage percentage of source onto target
+    gaps                source controls with no target equivalent
+    frameworks          list supported frameworks
+    objectives          list shared control objectives
+    threat-map          enrich a NIST->target crosswalk with authoritative
+                        OSCAL titles + ATT&CK techniques each control
+                        mitigates (uses data feeds)
+    enrich              authoritative OSCAL title + mitigated ATT&CK
+                        techniques for one NIST control id
+    feeds               manage FRAMEWORKMAP's authoritative data feeds
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  --format {table,json,csv,md}
+                        table (default) · json · csv · md (Markdown table for
+                        audit reports)
+  --catalog CATALOG     path to a JSON catalog to use instead of the built-in

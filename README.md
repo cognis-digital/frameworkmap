@@ -20,6 +20,76 @@ pip install cognis-frameworkmap
 frameworkmap map AC-2          # → one control mapped across every framework
 ```
 
+
+<!-- cognis:example:start -->
+## 🔎 Example output
+
+Real, reproducible output from the tool — runs offline:
+
+```console
+$ frameworkmap-emit --version
+frameworkmap 0.1.0
+```
+
+```console
+$ frameworkmap-emit --help
+usage: frameworkmap [-h] [--version] [--format {table,json,csv,md}]
+                    [--catalog CATALOG]
+                    {map,crosswalk,coverage,gaps,frameworks,objectives,threat-map,enrich,feeds} ...
+
+Crosswalk compliance controls across frameworks.
+
+positional arguments:
+  {map,crosswalk,coverage,gaps,frameworks,objectives,threat-map,enrich,feeds}
+    map                 auto-map one control to all other frameworks
+    crosswalk           full crosswalk between two frameworks
+    coverage            coverage percentage of source onto target
+    gaps                source controls with no target equivalent
+    frameworks          list supported frameworks
+    objectives          list shared control objectives
+    threat-map          enrich a NIST->target crosswalk with authoritative
+                        OSCAL titles + ATT&CK techniques each control
+                        mitigates (uses data feeds)
+    enrich              authoritative OSCAL title + mitigated ATT&CK
+                        techniques for one NIST control id
+    feeds               manage FRAMEWORKMAP's authoritative data feeds
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  --format {table,json,csv,md}
+                        table (default) · json · csv · md (Markdown table for
+                        audit reports)
+  --catalog CATALOG     path to a JSON catalog to use instead of the built-in
+```
+
+> Blocks above are real `frameworkmap` output — reproduce them from a clone.
+
+**Sample result format** _(illustrative values — run on your own data for real findings):_
+
+```
+{
+"Findings": [
+    {
+        "id": "1234567890",
+        "title": "Suspicious Network Traffic",
+        "description": "Possible reconnaissance activity detected.",
+        "tlp": "GREEN",
+        "created_at": "2023-02-15T14:30:00Z"
+    },
+    {
+        "id": "2345678901",
+        "title": "Malware Execution Detected",
+        "description": "Malicious code executed on compromised host.",
+        "tlp": "AMBER",
+        "created_at": "2023-02-15T14:35:00Z"
+    }
+]
+}
+```
+
+<!-- cognis:example:end -->
+
 ## Usage — step by step
 
 1. **Install** the CLI:
